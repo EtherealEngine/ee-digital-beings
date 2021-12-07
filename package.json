@@ -1,0 +1,40 @@
+{
+    "name": "digitalbeing",
+    "version": "0.0.0",
+    "description": "",
+    "main": "",
+    "scripts": {
+      "test:packages": "mocha --config .mocharc.js",
+      "check": "tsc --noEmit",
+      "lint": "prettier --check \"**/*.{ts,tsx}\"",
+      "format": "prettier --write \"**/*.{ts,tsx}\"",
+      "format-staged": "lint-staged"
+    },
+    "dependencies": {},
+    "peerDependencies":{
+      "@xrengine/engine": "^0.4.10",
+      "@xrengine/common": "^0.4.10",
+      "@xrengine/client-core": "^0.4.10",
+      "@xrengine/client": "^0.4.10"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/XRFoundation/XREngine-Project-Digital-Beings.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/XRFoundation/XREngine-Project-Digital-Beings/issues"
+    },
+    "homepage": "https://github.com/XRFoundation/XREngine-Project-Digital-Beings#readme",
+    "pre-commit": [
+      "format-staged"
+    ],
+    "lint-staged": {
+      "*.{ts,tsx}": [
+        "prettier --write",
+        "git add"
+      ]
+    }
+  }
