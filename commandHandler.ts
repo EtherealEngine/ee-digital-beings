@@ -500,6 +500,6 @@ export function goTo(pos: Vector3, entity: Entity) {
     overridePosition: pos
   })
   addComponent(entity, AutoPilotClickRequestComponent, {
-    coords: new Vector2(0, 0)
+    coords: new Vector2(0.01, 0.01)
   })
 }

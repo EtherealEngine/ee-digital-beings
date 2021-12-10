@@ -21,7 +21,7 @@ DBState.attach(() => ({
     id: Symbol('Logger'),
     init: () => ({
       onSet(arg) {
-        console.log('GOLF STATE \n' + JSON.stringify(DBState.attach(Downgraded).value, null, 2))
+        console.log('DB STATE \n' + JSON.stringify(DBState.attach(Downgraded).value, null, 2))
       }
     })
 }))
