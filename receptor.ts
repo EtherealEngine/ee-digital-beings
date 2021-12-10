@@ -12,17 +12,17 @@ import { isEntityLocalClient } from '@xrengine/engine/src/networking/functions/i
 import { WebCamInputComponent } from "./components/WebCamInputComponent"
 import { isClient } from '@xrengine/engine/src/common/functions/isClient'
 
-export function createReceptor(state: DBStateType) {
-    return function receptor(action) {
-        state.batch((s: DBStateType) => {
-            matches(action)
-                .when(Action.sendState, ({ state }) => {
-                    s.set(state)
-                })
-                .when(NetworkWorldAction.spanAvatar.matches, action => receptorSpawnAvatar(s, action))
-                .when(Action.playerLeave.matches, action => receptorPlayerLeave(s, action))
+export function createReceptor(dbState: DBStateType) {
+    return function receptor (action) {
+        dbState.batch((s: DBStateType) => {
+          matches(action)
+            .when(Action.sendState.matches, ({ state }) => {
+              s.set(state)
+            })
+            .when(NetworkWorldAction.spawnAvatar.matches, action => receptorSpawnAvatar(s, action))
+            .when(Action.playerLeave.matches, action => receptorPlayerLeave(s, action))
         })
-    }
+      }
 }
 
 export const receptorSpawnAvatar = (s: DBStateType, action: ReturnType<typeof NetworkWorldAction.spanAvatar>) => {

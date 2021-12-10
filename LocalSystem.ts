@@ -6,9 +6,9 @@ export default async function LocalSystem(world: World) {
   // TODO: this is temp, until reality packs have browser & node options
   if (!isClient) return () => {}
 
-  const { ProximitySystem } = await import('./db-project/systems/ProximitySystem')
-  const { WebCamInputSystem } = await import('./db-project/systems/WebCamInputSystem')
-  const { FollowSystem } = await import('./db-project/systems/FollowSystem')
+  const { ProximitySystem } = await import('./systems/ProximitySystem')
+  const { WebCamInputSystem } = await import('./systems/WebCamInputSystem')
+  const { FollowSystem } = await import('./systems/FollowSystem')
 
   const proximitySystem = await ProximitySystem(world)
   const webCamInputSystem = await WebCamInputSystem(world)

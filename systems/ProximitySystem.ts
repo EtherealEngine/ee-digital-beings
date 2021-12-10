@@ -1,12 +1,11 @@
 import { TransformComponent } from '@xrengine/engine/src/transform/components/TransformComponent'
 import { forwardVector3, multiplyQuaternion, normalize, subVector } from '@xrengine/common/src/utils/mathUtils'
-import { System } from '@xrengine/engine/src/ecs/classes/System'
 import { World } from '@xrengine/engine/src/ecs/classes/World'
 import { getComponent, defineQuery } from '@xrengine/engine/src/ecs/functions/ComponentFunctions'
 import { isEntityLocalClient } from '@xrengine/engine/src/networking/functions/isEntityLocalClient'
 import { ProximityComponent } from '../components/ProximityComponent'
-import { ChatService } from '@xrengine/client/src/social/services/ChatService'
-import { accessAuthState } from '@xrengine/client/src/user/services/AuthService'
+import { ChatService } from '@xrengine/client-core/src/social/services/ChatService'
+import { accessAuthState } from '@xrengine/client-core/src/user/services/AuthService'
 import { NetworkObjectComponent } from '@xrengine/engine/src/networking/components/NetworkObjectComponent'
 import { UserNameComponent } from '@xrengine/engine/src/scene/components/UserNameComponent'
 
@@ -40,7 +39,7 @@ export const ProximitySystem = async (world: World) => {
           if (!userEntity) continue
 
           const usernameComponent = getComponent(userEntity, UserNameComponent)
-          const username = usernameComponent !== undefined ? usernameComponent.username : 'remote user'
+          const username = (usernameComponent !== undefined && usernameComponent) ? usernameComponent.username : 'remote user'
           //console.log('username: ' + username)
           remoteTransform = getComponent(userEntity, TransformComponent)
           if (remoteTransform === undefined) continue
