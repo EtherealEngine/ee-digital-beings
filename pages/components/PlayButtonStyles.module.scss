@@ -1,0 +1,50 @@
+.playButtonContainer {
+    display: flex;
+    position: fixed;
+    bottom: 10%;
+    z-index: 10;
+    width: 100%;
+    justify-content: center;
+  
+    .playButton {
+      position: relative;
+      color: white;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-transform: capitalize;
+  
+      width: 160px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      margin: 20px;
+      height: 55px;
+      text-align: center;
+      border: none;
+      background-size: 300% 100%;
+      border-radius: 10px;
+      moz-transition: all 0.4s ease-in-out;
+      -o-transition: all 0.4s ease-in-out;
+      -webkit-transition: all 0.4s ease-in-out;
+      transition: all 0.4s ease-in-out;
+  
+      background-image: linear-gradient(to right, #25aae1, #40e495, #30dd8a, #2bb673);
+      box-shadow: 0 4px 15px 0 rgba(49, 196, 190, 0.75);
+  
+      &:focus {
+        outline: none;
+      }
+  
+      &:hover {
+        background-position: 100% 0;
+        moz-transition: all 0.4s ease-in-out;
+        -o-transition: all 0.4s ease-in-out;
+        -webkit-transition: all 0.4s ease-in-out;
+        transition: all 0.4s ease-in-out;
+      }
+    }
+  }
+  
