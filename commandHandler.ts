@@ -12,7 +12,7 @@ import {
   subscribeToChatSystem,
   unsubscribeFromChatSystem,
   getSubscribedChatSystems} from '@xrengine/engine/source/networking/utils/chatSystem'
-import { getRemoteUsers, getUserEntityByName } from '@xrengine/engine/source/networking/utils/getUser'
+import { getUserEntityByName } from '@xrengine/engine/source/networking/utils/getUser'
 import { TransformComponent } from '@xrengine/engine/source/transform/components/TransformComponent'
 import { isNumber } from '@xrengine/common/src/utils/miscUtils'
 import { AutoPilotOverrideComponent } from '@xrengine/engine/source/navigation/component/AutoPilotOverrideComponent'
@@ -20,6 +20,8 @@ import { isBot } from '@xrengine/engine/src/common/functions/isBot'
 import { Engine } from '@xrengine/engine/source/ecs/classes/Engine'
 import { Entity } from '@xrengine/engine/source/ecs/classes/Entity'
 import { UserId } from '@xrengine/common/src/interfaces/UserId'
+import { AfkCheckComponent } from './components/AfkCheckComponent'
+import { useWorld } from "@xrengine/engine/src/ecs/functions/SystemHooks"
 
 //The values the commands that must have in the start
 export const commandStarters = ['/', '//']
@@ -502,4 +504,26 @@ export function goTo(pos: Vector3, entity: Entity) {
   addComponent(entity, AutoPilotClickRequestComponent, {
     coords: new Vector2(0.01, 0.01)
   })
+}
+
+
+
+export function getRemoteUsers(localUserId, notAfk: boolean): UserId[] {
+  const world = useWorld()
+  const res: UserId[] = []
+
+  for (let [_, client] of world.clients) {
+    if (client.userId !== localUserId) {
+      if (!notAfk) res.push(client.userId)
+      else {
+        const eid = world.getUserAvatarEntity(client.userId)
+        if (eid !== undefined) {
+          const acc = getComponent(eid, AfkCheckComponent)
+          if (acc !== undefined && !acc.isAfk) res.push(client.userId)
+        }
+      }
+    }
+  }
+
+  return res
 }

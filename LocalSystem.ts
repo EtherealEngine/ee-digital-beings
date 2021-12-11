@@ -9,10 +9,12 @@ export default async function LocalSystem(world: World) {
   const { ProximitySystem } = await import('./systems/ProximitySystem')
   const { WebCamInputSystem } = await import('./systems/WebCamInputSystem')
   const { FollowSystem } = await import('./systems/FollowSystem')
+  const { AfkCheckSystem } = await import('./systems/AfkCheckSystem')
 
   const proximitySystem = await ProximitySystem(world)
   const webCamInputSystem = await WebCamInputSystem(world)
   const followSystem = await FollowSystem(world)
+  const afkCheckSystem = await AfkCheckSystem(world)
 
-  return pipe(proximitySystem, webCamInputSystem, followSystem)
+  return pipe(proximitySystem, webCamInputSystem, followSystem, afkCheckSystem)
 }

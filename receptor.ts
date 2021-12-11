@@ -11,6 +11,8 @@ import { isBot } from '@xrengine/engine/src/common/functions/isBot'
 import { isEntityLocalClient } from '@xrengine/engine/src/networking/functions/isEntityLocalClient'
 import { WebCamInputComponent } from "./components/WebCamInputComponent"
 import { isClient } from '@xrengine/engine/src/common/functions/isClient'
+import { AfkCheckComponent } from "./components/AfkCheckComponent"
+import { Vector3 } from 'three'
 
 export function createReceptor(dbState: DBStateType) {
     return function receptor (action) {
@@ -45,31 +47,42 @@ export const receptorSpawnAvatar = (s: DBStateType, action: ReturnType<typeof Ne
     dispatchFrom(world.hostId, () => Action.sendState({ state: s.attach(Downgraded).value })).to(userId)
     const entity = world.getUserAvatarEntity(userId)
     console.log('spawning player, isClient: ' + isClient + ' isEntityLocalClient: ' + isEntityLocalClient(entity))
-    if (isClient && isEntityLocalClient(entity)) {
-        if (!hasComponent(world.localClientEntity, ProximityComponent, world)) {// && isBot(window)) {
-            addComponent(
+    if (isClient) {
+            if (!hasComponent(entity, AfkCheckComponent)) {
+            addComponent(entity, AfkCheckComponent, {
+                isAfk: false,
+                prevPosition: new Vector3(0, 0, 0),
+                cStep: 0,
+                cStep2: 0,
+                timer: 0
+            })
+        }
+        if (isEntityLocalClient(entity)) {
+            if (!hasComponent(world.localClientEntity, ProximityComponent, world)) {// && isBot(window)) {
+                addComponent(
+                    world.localClientEntity,
+                    ProximityComponent,
+                    {
+                    usersInRange: [],
+                    usersInIntimateRange: [],
+                    usersInHarassmentRange: [],
+                    usersLookingTowards: []
+                    },
+                    world
+                )
+            }
+            if (!hasComponent(world.localClientEntity, WebCamInputComponent, world)) {
+                addComponent(
                 world.localClientEntity,
-                ProximityComponent,
+                WebCamInputComponent,
                 {
-                usersInRange: [],
-                usersInIntimateRange: [],
-                usersInHarassmentRange: [],
-                usersLookingTowards: []
+                    emotions: []
                 },
                 world
-            )
+                )
+            }
+            console.log('added web cam input component to local client')
         }
-        if (!hasComponent(world.localClientEntity, WebCamInputComponent, world)) {
-            addComponent(
-              world.localClientEntity,
-              WebCamInputComponent,
-              {
-                emotions: []
-              },
-              world
-            )
-          }
-          console.log('added web cam input component to local client')
     }
 }
 
