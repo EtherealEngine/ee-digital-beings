@@ -450,7 +450,7 @@
       "parent": "2266BED7-6CC4-48A6-95DD-9BCD3CF9EAFC",
       "index": 6
     },
-    "D6D58240-5D19-427C-8EA7-47BB16D015CC": {
+    "F0D45606-4CBA-49F3-A50D-1B27C6FD8037": {
       "name": "dbSystem",
       "components": [
         {
@@ -492,8 +492,8 @@
       "parent": "2266BED7-6CC4-48A6-95DD-9BCD3CF9EAFC",
       "index": 7
     },
-    "16B5F403-B700-4CF1-A1E1-910208A7A277": {
-      "name": "localSystems",
+    "D1168179-EA22-453B-81E4-1E42F26C2000": {
+      "name": "LocalSystem",
       "components": [
         {
           "name": "transform",
@@ -526,8 +526,7 @@
           "props": {
             "filePath": "__$project$__/XREngine-Project-Digital-Beings/LocalSystem.ts",
             "systemUpdateType": "FIXED",
-            "enableClient": true,
-            "enableServer": false
+            "enableClient": true
           }
         }
       ],
