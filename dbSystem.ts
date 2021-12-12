@@ -1,11 +1,8 @@
 import { createState, Downgraded } from '@hookstate/core'
 import { UserId } from '@xrengine/common/src/interfaces/UserId'
 import { useState } from '@hookstate/core'
-import { Engine } from '@xrengine/engine/src/ecs/classes/Engine'
 import { World } from '@xrengine/engine/src/ecs/classes/World'
 import { createReceptor } from  './receptor'
-import { client } from '@xrengine/client-core/src/feathers'
-import { handleCommand } from './commandHandler'
 
 export const DBState = createState({
     players: [] as Array<{
@@ -35,10 +32,6 @@ export function useDBState() {
 
 globalThis.DBState = DBState
 console.log('initializing db system script')
-
-client.service('message').on('create', (msg) => {
-    console.log('got new message: ' + JSON.stringify(msg));
-})
 
 export default async function dbSystem(world: World) {
     console.log('init db system')

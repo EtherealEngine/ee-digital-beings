@@ -1,27 +1,27 @@
 import { Vector3, Vector2 } from 'three'
-import { AnimationGraph } from '@xrengine/engine/source/avatar/animations/AnimationGraph'
-import { AvatarAnimations, AvatarStates } from '@xrengine/engine/source/avatar/animations/Util'
-import { AvatarAnimationComponent } from '@xrengine/engine/source/avatar/components/AvatarAnimationComponent'
-import { getComponent, hasComponent, addComponent } from '@xrengine/engine/source/ecs/functions/ComponentFunctions'
-import { LocalInputTagComponent } from '@xrengine/engine/source/input/components/LocalInputTagComponent'
-import { AutoPilotClickRequestComponent } from '@xrengine/engine/source/navigation/component/AutoPilotClickRequestComponent'
-import { AutoPilotComponent } from '@xrengine/engine/source/navigation/component/AutoPilotComponent'
-import { removeFollowComponent, createFollowComponent } from '@xrengine/engine/source/navigation/component/FollowComponent'
-import { stopAutopilot } from '@xrengine/engine/source/navigation/functions/stopAutopilot'
+import { AnimationGraph } from '@xrengine/engine/src/avatar/animations/AnimationGraph'
+import { AvatarAnimations, AvatarStates } from '@xrengine/engine/src/avatar/animations/Util'
+import { AvatarAnimationComponent } from '@xrengine/engine/src/avatar/components/AvatarAnimationComponent'
+import { getComponent, hasComponent, addComponent } from '@xrengine/engine/src/ecs/functions/ComponentFunctions'
+import { LocalInputTagComponent } from '@xrengine/engine/src/input/components/LocalInputTagComponent'
+import { AutoPilotClickRequestComponent } from '@xrengine/engine/src/navigation/component/AutoPilotClickRequestComponent'
+import { AutoPilotComponent } from '@xrengine/engine/src/navigation/component/AutoPilotComponent'
+import { stopAutopilot } from '@xrengine/engine/src/navigation/functions/stopAutopilot'
 import {
   subscribeToChatSystem,
   unsubscribeFromChatSystem,
-  getSubscribedChatSystems} from '@xrengine/engine/source/networking/utils/chatSystem'
-import { getUserEntityByName } from '@xrengine/engine/source/networking/utils/getUser'
-import { TransformComponent } from '@xrengine/engine/source/transform/components/TransformComponent'
+  getSubscribedChatSystems} from '@xrengine/engine/src/networking/utils/chatSystem'
+import { getUserEntityByName } from '@xrengine/engine/src/networking/utils/getUser'
+import { TransformComponent } from '@xrengine/engine/src/transform/components/TransformComponent'
 import { isNumber } from '@xrengine/common/src/utils/miscUtils'
-import { AutoPilotOverrideComponent } from '@xrengine/engine/source/navigation/component/AutoPilotOverrideComponent'
+import { AutoPilotOverrideComponent } from '@xrengine/engine/src/navigation/component/AutoPilotOverrideComponent'
 import { isBot } from '@xrengine/engine/src/common/functions/isBot'
-import { Engine } from '@xrengine/engine/source/ecs/classes/Engine'
-import { Entity } from '@xrengine/engine/source/ecs/classes/Entity'
+import { Engine } from '@xrengine/engine/src/ecs/classes/Engine'
+import { Entity } from '@xrengine/engine/src/ecs/classes/Entity'
 import { UserId } from '@xrengine/common/src/interfaces/UserId'
 import { AfkCheckComponent } from './components/AfkCheckComponent'
 import { useWorld } from "@xrengine/engine/src/ecs/functions/SystemHooks"
+import { createFollowComponent, removeFollowComponent } from './components/FollowComponent'
 
 //The values the commands that must have in the start
 export const commandStarters = ['/', '//']
