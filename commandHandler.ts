@@ -10,7 +10,7 @@ import { stopAutopilot } from '@xrengine/engine/src/navigation/functions/stopAut
 import {
   subscribeToChatSystem,
   unsubscribeFromChatSystem,
-  getSubscribedChatSystems} from '@xrengine/engine/src/networking/utils/chatSystem'
+  getSubscribedChatSystems} from '@xrengine/client-core/src/social/services/utils/chatSystem'
 import { getUserEntityByName } from '@xrengine/engine/src/networking/utils/getUser'
 import { TransformComponent } from '@xrengine/engine/src/transform/components/TransformComponent'
 import { isNumber } from '@xrengine/common/src/utils/miscUtils'

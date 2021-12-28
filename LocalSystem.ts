@@ -10,7 +10,7 @@ import {
   getChatMessageSystem,
   hasSubscribedToChatSystem,
   removeMessageSystem
-} from '@xrengine/engine/src/networking/utils/chatSystem'
+} from '@xrengine/client-core/src/social/services/utils/chatSystem'
 import { isBot } from '@xrengine/engine/src/common/functions/isBot'
 
 console.log('loaded local systems')
