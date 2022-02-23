@@ -9,7 +9,7 @@ jobs:
       - name: check for secrets needed to run workflows
         id: check-secrets
         run: |
-          if [ ${{ secrets.BRANCH_BUILD_ENABLED }} == 'true' ]; then
+          if [ ${{ secrets.PROJECT_BUILD_ENABLED }} == 'true' ]; then
             echo "::set-output name=ok::enabled"
           fi
   compile-codebase:
