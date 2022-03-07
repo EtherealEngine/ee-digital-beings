@@ -1,26 +1,26 @@
-import { Vector3, Vector2 } from 'three'
-import { AnimationGraph } from '@xrengine/engine/src/avatar/animations/AnimationGraph'
-import { AvatarAnimations, AvatarStates } from '@xrengine/engine/src/avatar/animations/Util'
-import { AvatarAnimationComponent } from '@xrengine/engine/src/avatar/components/AvatarAnimationComponent'
-import { getComponent, hasComponent, addComponent } from '@xrengine/engine/src/ecs/functions/ComponentFunctions'
-import { LocalInputTagComponent } from '@xrengine/engine/src/input/components/LocalInputTagComponent'
-import { AutoPilotClickRequestComponent } from '@xrengine/engine/src/navigation/component/AutoPilotClickRequestComponent'
-import { AutoPilotComponent } from '@xrengine/engine/src/navigation/component/AutoPilotComponent'
-import { stopAutopilot } from '@xrengine/engine/src/navigation/functions/stopAutopilot'
+import { Vector2, Vector3 } from 'three'
+
 import {
+  getSubscribedChatSystems,
   subscribeToChatSystem,
-  unsubscribeFromChatSystem,
-  getSubscribedChatSystems} from '@xrengine/client-core/src/social/services/utils/chatSystem'
-import { getUserEntityByName } from '@xrengine/engine/src/networking/utils/getUser'
-import { TransformComponent } from '@xrengine/engine/src/transform/components/TransformComponent'
+  unsubscribeFromChatSystem
+} from '@xrengine/client-core/src/social/services/utils/chatSystem'
+import { UserId } from '@xrengine/common/src/interfaces/UserId'
 import { isNumber } from '@xrengine/common/src/utils/miscUtils'
-import { AutoPilotOverrideComponent } from '@xrengine/engine/src/navigation/component/AutoPilotOverrideComponent'
+import { changeAvatarAnimationState } from '@xrengine/engine/src/avatar/animation/Util'
+import { AvatarStates } from '@xrengine/engine/src/avatar/animation/Util'
 import { isBot } from '@xrengine/engine/src/common/functions/isBot'
 import { Engine } from '@xrengine/engine/src/ecs/classes/Engine'
 import { Entity } from '@xrengine/engine/src/ecs/classes/Entity'
-import { UserId } from '@xrengine/common/src/interfaces/UserId'
+import { addComponent, getComponent } from '@xrengine/engine/src/ecs/functions/ComponentFunctions'
+import { useWorld } from '@xrengine/engine/src/ecs/functions/SystemHooks'
+import { LocalInputTagComponent } from '@xrengine/engine/src/input/components/LocalInputTagComponent'
+import { AutoPilotClickRequestComponent } from '@xrengine/engine/src/navigation/component/AutoPilotClickRequestComponent'
+import { AutoPilotOverrideComponent } from '@xrengine/engine/src/navigation/component/AutoPilotOverrideComponent'
+import { getUserEntityByName } from '@xrengine/engine/src/networking/utils/getUser'
+import { TransformComponent } from '@xrengine/engine/src/transform/components/TransformComponent'
+
 import { AfkCheckComponent } from './components/AfkCheckComponent'
-import { useWorld } from "@xrengine/engine/src/ecs/functions/SystemHooks"
 import { createFollowComponent, removeFollowComponent } from './components/FollowComponent'
 
 //The values the commands that must have in the start
@@ -296,34 +296,34 @@ function handleGoToCommand(landmark: string, entity: any) {
 function handleEmoteCommand(emote: string, entity: any) {
   switch (emote) {
     case 'dance1':
-      runAnimation(entity, AvatarStates.LOOPABLE_EMOTE, { animationName: AvatarAnimations.DANCING_1 })
+      runAnimation(entity, AvatarStates.DANCE1)
       break
     case 'dance2':
-      runAnimation(entity, AvatarStates.LOOPABLE_EMOTE, { animationName: AvatarAnimations.DANCING_2 })
+      runAnimation(entity, AvatarStates.DANCE2)
       break
     case 'dance3':
-      runAnimation(entity, AvatarStates.LOOPABLE_EMOTE, { animationName: AvatarAnimations.DANCING_3 })
+      runAnimation(entity, AvatarStates.DANCE3)
       break
     case 'dance4':
-      runAnimation(entity, AvatarStates.LOOPABLE_EMOTE, { animationName: AvatarAnimations.DANCING_4 })
+      runAnimation(entity, AvatarStates.DANCE4)
       break
     case 'clap':
-      runAnimation(entity, AvatarStates.EMOTE, { animationName: AvatarAnimations.CLAP })
+      runAnimation(entity, AvatarStates.CLAP)
       break
     case 'cry':
-      runAnimation(entity, AvatarStates.EMOTE, { animationName: AvatarAnimations.CRY })
+      runAnimation(entity, AvatarStates.CRY)
       break
     case 'laugh':
-      runAnimation(entity, AvatarStates.EMOTE, { animationName: AvatarAnimations.LAUGH })
+      runAnimation(entity, AvatarStates.LAUGH)
       break
     case 'sad':
-      runAnimation(entity, AvatarStates.EMOTE, { animationName: AvatarAnimations.CRY })
+      runAnimation(entity, AvatarStates.CRY)
       break
     case 'kiss':
-      runAnimation(entity, AvatarStates.EMOTE, { animationName: AvatarAnimations.KISS })
+      runAnimation(entity, AvatarStates.KISS)
       break
     case 'wave':
-      runAnimation(entity, AvatarStates.EMOTE, { animationName: AvatarAnimations.WAVE })
+      runAnimation(entity, AvatarStates.WAVE)
       break
     default:
       console.log(
@@ -462,23 +462,8 @@ function handleGetLocalUserIdCommand(userId) {
   console.log('localId|' + userId)
 }
 
-function runAnimation(entity: any, emote: string, emoteParams: any) {
-  const aac = getComponent(entity, AvatarAnimationComponent)
-
-  if (!aac.animationGraph.validateTransition(aac.currentState, aac.animationGraph.states[emote])) {
-    console.warn('immediate transition to [%s] is not available from current state [%s]', emote, aac.currentState.name)
-  }
-
-  if (!hasComponent(entity, AutoPilotComponent)) AnimationGraph.forceUpdateAnimationState(entity, emote, emoteParams)
-  else {
-    stopAutopilot(entity)
-    let interval = setInterval(() => {
-      if (aac.animationGraph.validateTransition(aac.currentState, aac.animationGraph.states[emote])) {
-        clearInterval(interval)
-        AnimationGraph.forceUpdateAnimationState(entity, emote, emoteParams)
-      }
-    }, 50)
-  }
+function runAnimation(entity: any, emote: string) {
+  changeAvatarAnimationState(entity, emote)
 }
 
 function getMetadataPosition(_pos: string): Vector3 {
@@ -505,8 +490,6 @@ export function goTo(pos: Vector3, entity: Entity) {
     coords: new Vector2(0.01, 0.01)
   })
 }
-
-
 
 export function getRemoteUsers(localUserId, notAfk: boolean): UserId[] {
   const world = useWorld()

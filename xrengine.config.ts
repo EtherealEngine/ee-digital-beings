@@ -1,17 +1,11 @@
 import type { ProjectConfigInterface } from '@xrengine/projects/ProjectConfigInterface'
 
 const config: ProjectConfigInterface = {
-  thumbnail: "https://imgur.com/Spyv0Fv.png",
-  routes: {
-    '/': {
-      component: () => import('./pages/index'),
-      props: {
-        exact: true
-      }
-    }
-  },
+  onEvent: undefined,
+  thumbnail: '/static/xrengine_thumbnail.jpg',
+  routes: {},
   services: undefined,
-  databaseSeed: undefined,
+  databaseSeed: undefined
 }
 
 export default config

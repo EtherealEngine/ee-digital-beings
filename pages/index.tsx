@@ -30,7 +30,7 @@ export const HomePage = (props): any => {
     return (
       <>
         {showStartButton && <PlayButton onclick={handleClickPlayButton} />}
-        <LoadLocationScene locationName="golf" />
+        <LoadLocationScene locationName="bot" />
         <LoadEngineWithScene connectToInstanceServer={false} />
         <AvatarInputSwitch enabled={inputsEnabled} joinedWorld={joinedWorld} />
       </>
