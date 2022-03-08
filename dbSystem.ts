@@ -1,9 +1,22 @@
 import { createState, Downgraded, useState } from '@speigg/hookstate'
+import { Vector3 } from 'three'
+import matches from 'ts-matches'
 
 import { UserId } from '@xrengine/common/src/interfaces/UserId'
+import { isClient } from '@xrengine/engine/src/common/functions/isClient'
+import { EngineEvents } from '@xrengine/engine/src/ecs/classes/EngineEvents'
+import { EngineActions, EngineActionType } from '@xrengine/engine/src/ecs/classes/EngineService'
 import { World } from '@xrengine/engine/src/ecs/classes/World'
+import { addComponent, hasComponent } from '@xrengine/engine/src/ecs/functions/ComponentFunctions'
+import { useWorld } from '@xrengine/engine/src/ecs/functions/SystemHooks'
+import { dispatchFrom } from '@xrengine/engine/src/networking/functions/dispatchFrom'
+import { isEntityLocalClient } from '@xrengine/engine/src/networking/functions/isEntityLocalClient'
+import { NetworkWorldAction } from '@xrengine/engine/src/networking/functions/NetworkWorldAction'
 
-import { createReceptor } from './receptor'
+import { Action } from './Actions'
+import { AfkCheckComponent } from './components/AfkCheckComponent'
+import { ProximityComponent } from './components/ProximityComponent'
+import { WebCamInputComponent } from './components/WebCamInputComponent'
 
 export const DBState = createState({
   players: [] as Array<{
@@ -36,7 +49,52 @@ console.log('initializing db system script')
 
 export default async function dbSystem(world: World) {
   console.log('init db system')
-  world.receptors.push(createReceptor(DBState))
+  world.receptors.push((action) => {
+    matches(action).when(NetworkWorldAction.spawnAvatar.matches, (spawnAction) => {
+      const { userId, networkId } = action
+
+      const world = useWorld()
+      const entity = world.getUserAvatarEntity(userId)
+      if (isClient) {
+        if (entity && !hasComponent(entity, AfkCheckComponent)) {
+          addComponent(entity, AfkCheckComponent, {
+            isAfk: false,
+            prevPosition: new Vector3(0, 0, 0),
+            cStep: 0,
+            cStep2: 0,
+            timer: 0
+          })
+        }
+        if (isEntityLocalClient(entity)) {
+          if (!hasComponent(world.localClientEntity, ProximityComponent, world)) {
+            // && isBot(window)) {
+            addComponent(
+              world.localClientEntity,
+              ProximityComponent,
+              {
+                usersInRange: [],
+                usersInIntimateRange: [],
+                usersInHarassmentRange: [],
+                usersLookingTowards: []
+              },
+              world
+            )
+          }
+          if (!hasComponent(world.localClientEntity, WebCamInputComponent, world)) {
+            addComponent(
+              world.localClientEntity,
+              WebCamInputComponent,
+              {
+                emotions: []
+              },
+              world
+            )
+          }
+          console.log('added web cam input component to local client')
+        }
+      }
+    })
+  })
 
   return () => {
     return world
