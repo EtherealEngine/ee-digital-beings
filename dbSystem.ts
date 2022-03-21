@@ -47,10 +47,9 @@ export default async function dbSystem(world: World) {
   console.log('init db system')
   world.receptors.push((action) => {
     matches(action).when(NetworkWorldAction.spawnAvatar.matches, (spawnAction) => {
-      const { userId, networkId } = action
 
       const world = useWorld()
-      const entity = world.getUserAvatarEntity(userId)
+      const entity = world.getNetworkObject(spawnAction.$from, spawnAction.networkId)
       if (isClient) {
         if (entity && !hasComponent(entity, AfkCheckComponent)) {
           addComponent(entity, AfkCheckComponent, {

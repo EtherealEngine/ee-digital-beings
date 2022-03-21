@@ -294,6 +294,8 @@ function handleGoToCommand(landmark: string, entity: any) {
 }
 
 function handleEmoteCommand(emote: string, entity: any) {
+  emote = emote.toLowerCase().trim();
+  
   switch (emote) {
     case 'dance1':
       runAnimation(entity, AvatarStates.DANCE1)

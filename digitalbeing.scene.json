@@ -524,7 +524,7 @@
             "filePath": "__$project$__/XREngine-Project-Digital-Beings/LocalSystem.ts",
             "systemUpdateType": "FIXED",
             "enableClient": true,
-            "enableServer": true,
+            "enableServer": false,
             "args": {}
           }
         }
@@ -532,6 +532,23 @@
       "parent": "2266BED7-6CC4-48A6-95DD-9BCD3CF9EAFC",
       "index": 8,
       "name": "LocalSystem"
+    },
+    "3FE6554C-3A46-46B1-A90A-20C8BE7A7A26": {
+      "components": [
+        {
+          "name": "system",
+          "props": {
+            "filePath": "__$project$__/XREngine-Project-Digital-Beings/ClientSystem.ts",
+            "systemUpdateType": "FIXED",
+            "enableClient": true,
+            "enableServer": false,
+            "args": {}
+          }
+        }
+      ],
+      "parent": "2266BED7-6CC4-48A6-95DD-9BCD3CF9EAFC",
+      "index": 9,
+      "name": "ClientSystem"
     }
   },
   "root": "2266BED7-6CC4-48A6-95DD-9BCD3CF9EAFC"

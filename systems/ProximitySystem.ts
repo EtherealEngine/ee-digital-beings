@@ -23,6 +23,7 @@ export const ProximitySystem = async (world: World) => {
           eid,
           ProximityComponent
         )
+        
         const _usersInRange: any[] = []
         const _usersInIntimateRange: any = []
         const _usersInHarassmentRange: any = []
@@ -40,7 +41,6 @@ export const ProximitySystem = async (world: World) => {
 
           const usernameComponent = getComponent(userEntity, UserNameComponent)
           const username = (usernameComponent !== undefined && usernameComponent) ? usernameComponent.username : 'remote user'
-          //console.log('username: ' + username)
           remoteTransform = getComponent(userEntity, TransformComponent)
           if (remoteTransform === undefined) continue
 
