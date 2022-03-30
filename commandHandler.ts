@@ -1,4 +1,4 @@
-import { Vector2, Vector3 } from 'three'
+import { Quaternion, Vector2, Vector3 } from 'three'
 
 import {
   getSubscribedChatSystems,
@@ -6,15 +6,22 @@ import {
   unsubscribeFromChatSystem
 } from '@xrengine/client-core/src/social/services/utils/chatSystem'
 import { UserId } from '@xrengine/common/src/interfaces/UserId'
-import { isNumber } from '@xrengine/common/src/utils/miscUtils'
+import { lookAt } from '@xrengine/common/src/utils/mathUtils'
 import { changeAvatarAnimationState } from '@xrengine/engine/src/avatar/animation/Util'
 import { AvatarStates } from '@xrengine/engine/src/avatar/animation/Util'
+import { FollowCameraComponent } from '@xrengine/engine/src/camera/components/FollowCameraComponent'
+import { LifecycleValue } from '@xrengine/engine/src/common/enums/LifecycleValue'
 import { isBot } from '@xrengine/engine/src/common/functions/isBot'
 import { Engine } from '@xrengine/engine/src/ecs/classes/Engine'
 import { Entity } from '@xrengine/engine/src/ecs/classes/Entity'
 import { addComponent, getComponent } from '@xrengine/engine/src/ecs/functions/ComponentFunctions'
 import { useWorld } from '@xrengine/engine/src/ecs/functions/SystemHooks'
+import { InputComponent } from '@xrengine/engine/src/input/components/InputComponent'
 import { LocalInputTagComponent } from '@xrengine/engine/src/input/components/LocalInputTagComponent'
+import { BaseInput } from '@xrengine/engine/src/input/enums/BaseInput'
+import { CameraInput } from '@xrengine/engine/src/input/enums/InputEnums'
+import { InputType } from '@xrengine/engine/src/input/enums/InputType'
+import { lipToInput } from '@xrengine/engine/src/input/functions/WebcamInput'
 import { AutoPilotClickRequestComponent } from '@xrengine/engine/src/navigation/component/AutoPilotClickRequestComponent'
 import { AutoPilotOverrideComponent } from '@xrengine/engine/src/navigation/component/AutoPilotOverrideComponent'
 import { getUserEntityByName } from '@xrengine/engine/src/networking/utils/getUser'
@@ -68,6 +75,7 @@ export function handleCommand(cmd: string, entity: Entity, userId: UserId): bool
     }
   }
 
+  console.log('command:', base)
   //Handle the command according to the base
   switch (base) {
     case 'move': {
@@ -234,6 +242,34 @@ export function handleCommand(cmd: string, entity: Entity, userId: UserId): bool
 
       return true
     }
+    case 'lookAt': {
+      let name = ''
+      if (params.length < 1) {
+        console.log('invalid params')
+        return true
+      } else if (params.length === 1) {
+        name = params[0]
+      } else {
+        name = params.join(' ')
+      }
+
+      handleLookAt(name, entity, userId)
+
+      return true
+    }
+    case 'lipSync': {
+      if (params.length !== 3) {
+        return true
+      }
+
+      const pucker = parseFloat(params[0])
+      const widen = parseFloat(params[1])
+      const open = parseFloat(params[2])
+
+      handleLipSync(pucker, widen, open)
+
+      return true
+    }
     default: {
       console.log('unknown command: ' + base + ' params: ' + params)
       return false
@@ -294,8 +330,8 @@ function handleGoToCommand(landmark: string, entity: any) {
 }
 
 function handleEmoteCommand(emote: string, entity: any) {
-  emote = emote.toLowerCase().trim();
-  
+  emote = emote.toLowerCase().trim()
+
   switch (emote) {
     case 'dance1':
       runAnimation(entity, AvatarStates.DANCE1)
@@ -344,27 +380,32 @@ async function handleGetSubscribedChatSystemsCommand(userId: any) {
   console.log(systems)
 }
 
-function handleFaceCommand(face: string, entity: any) {
-  if (face === undefined || face === '') return
+const nameToInputValue = {
+  angry: CameraInput.Angry,
+  disgusted: CameraInput.Disgusted,
+  fearful: CameraInput.Fearful,
+  happy: CameraInput.Happy,
+  neutral: CameraInput.Neutral,
+  sad: CameraInput.Sad,
+  surprised: CameraInput.Surprised
+}
+async function handleFaceCommand(face: string, entity: any) {
+  if (face === undefined || !face || face === '') return
 
-  const faces = face.split(' ')
-  if (faces.length == 0) return
-  let time: number = 0
-  if (faces.length > 1) {
-    if (isNumber(faces[faces.length - 1])) {
-      time = parseFloat(faces[faces.length - 1])
-      faces.splice(faces.length - 1, 1)
-    }
-  }
+  face = face.toLowerCase().trim()
 
-  const _faces = []
-  for (let i = 0; i < faces.length; i += 2) {
-    const faceData = faces[i]
-    const facePerc = faces[i + 1]
-    _faces[faceData] = facePerc
-  }
+  Engine.inputState.set(nameToInputValue[face], {
+    type: InputType.ONEDIM,
+    value: 1,
+    lifecycleState: LifecycleValue.Changed
+  })
 
-  //handle face
+  await delay(2000)
+
+  Engine.inputState.delete(nameToInputValue[face])
+}
+async function delay(timeout) {
+  await this.waitForTimeout(timeout)
 }
 
 function handleGetPositionCommand(player: string, userId) {
@@ -463,6 +504,70 @@ function handleGetLocalUserIdCommand(userId) {
 
   console.log('localId|' + userId)
 }
+async function handleLookAt(param: string, entity: number, userId: string) {
+  const targetEntity = getUserEntityByName(param, userId)
+  console.log('follow target (' + param + ') entity: ' + targetEntity)
+  if (targetEntity === undefined || entity === targetEntity) return
+
+  const selfT: TransformComponent = getComponent(entity, TransformComponent)
+  const remoteT: TransformComponent = getComponent(targetEntity, TransformComponent)
+  if (selfT === undefined || remoteT === undefined) return
+  if (selfT.position === remoteT.position) return
+
+  const remotePos = new Vector3().copy(remoteT.position)
+  const selfPos = new Vector3().copy(selfT.position)
+
+  const direction = remotePos.sub(selfPos).normalize()
+  const dot = Dot(new Vector3(0, 0, 1), direction)
+  let rot: Quaternion = new Quaternion().copy(selfT.rotation)
+  let rotAngle = getComponent(entity, FollowCameraComponent).theta
+
+  const fVector = new Vector3(0, 0, 1)
+  const selfRot = new Quaternion().copy(selfT.rotation)
+  const forwardB = fVector.applyQuaternion(selfRot)
+
+  if (Math.abs(dot - -1.0) < 0.01) {
+    rot = new Quaternion(0, 1, 0, Math.PI)
+  } else if (Math.abs(dot - 1.0) < 0.000001) {
+    rot = new Quaternion(0, 0, 0, 1)
+  } else {
+    rotAngle = Math.acos(dot)
+    let rotAxis = Cross(new Vector3(0, 0, 1), direction)
+    rotAxis = rotAxis.normalize()
+
+    const halfAngle = rotAngle * 0.5
+    const s = Math.sin(halfAngle)
+    rot = new Quaternion(rotAxis.x * s, rotAxis.y * s, rotAxis.z * s, Math.cos(halfAngle))
+
+    getComponent(entity, TransformComponent).rotation = rot
+
+    const theta = -lookAt(selfPos, undefined, remotePos)
+    console.log('new camera angle:', theta)
+
+    Engine.inputState.set(BaseInput.LOOKTURN_PLAYERONE, {
+      type: InputType.TWODIM,
+      value: [0.5, 0],
+      lifecycleState: LifecycleValue.Changed
+    })
+
+    await delay(500)
+
+    Engine.inputState.delete(BaseInput.LOOKTURN_PLAYERONE)
+
+    //setTargetCameraRotation(entity, getComponent(entity, FollowCameraComponent).phi, theta)
+
+    //getComponent(entity, FollowCameraComponent).theta = theta
+  }
+
+  /* getComponent(entity, FollowCameraComponent).locked = false
+  getComponent(entity, TransformComponent).rotation = rot
+  getComponent(entity, FollowCameraComponent).theta = rotAngle
+  getComponent(entity, FollowCameraComponent).phi = rotAngle
+  getComponent(entity, FollowCameraComponent).locked = true*/
+}
+function handleLipSync(pucker: number, widen: number, open: number) {
+  lipToInput(pucker, widen, open)
+}
 
 function runAnimation(entity: any, emote: string) {
   changeAvatarAnimationState(entity, emote)
@@ -511,4 +616,60 @@ export function getRemoteUsers(localUserId, notAfk: boolean): UserId[] {
   }
 
   return res
+}
+
+export function Cross(lhs: Vector3, rhs: Vector3): Vector3 {
+  return new Vector3(lhs.y * rhs.z - lhs.z * rhs.y, lhs.z * rhs.x - lhs.x * rhs.z, lhs.x * rhs.y - lhs.y * rhs.x)
+}
+
+export function Dot(lhs: Vector3, rhs: Vector3): number {
+  return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z
+}
+
+export function Project(vector: Vector3, onNormal: Vector3): Vector3 {
+  const sqrMag = Dot(onNormal, onNormal)
+  if (sqrMag < Number.EPSILON) {
+    return new Vector3(0, 0, 0)
+  } else {
+    const dot = Dot(vector, onNormal)
+    return new Vector3((onNormal.x * dot) / sqrMag, (onNormal.y * dot) / sqrMag, (onNormal.z * dot) / sqrMag)
+  }
+}
+
+export function FromToRotation(aFrom: Vector3, aTo: Vector3): Quaternion {
+  const axis = Cross(aFrom, aTo)
+  const angle = Angle(aFrom, aTo)
+  return AngleAxis(angle, axis.normalize())
+}
+
+export function Angle(from: Vector3, to: Vector3): number {
+  const kEpsilonNormalSqrt = (1 ^ 10) - 15
+  const Deg2Rad = (Math.PI * 2) / 360
+  const Rad2Deg = 1 / Deg2Rad
+
+  const denominator = Math.sqrt(SqrMagnitude(from) * SqrMagnitude(to))
+  if (denominator < kEpsilonNormalSqrt) {
+    console.log('value is lower than kepsilon')
+    return 0
+  }
+
+  const dot = Clamp(Dot(from, to), -1, 1)
+  return Math.acos(dot) * Rad2Deg
+}
+
+export function AngleAxis(aAngle: number, aAxis: Vector3): Quaternion {
+  const Deg2Rad = (Math.PI * 2) / 360
+  aAxis = aAxis.normalize()
+  const rad = aAngle * Deg2Rad * 0.5
+  return new Quaternion(aAxis.x, aAxis.y, aAxis.z, Math.cos(rad))
+}
+
+export function SqrMagnitude(vector: Vector3) {
+  return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z
+}
+
+export function Clamp(value: number, min: number, max: number): number {
+  if (value < min) return min
+  if (value > max) return max
+  return value
 }

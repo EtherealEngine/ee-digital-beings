@@ -1,10 +1,10 @@
 import { setSoundFunction } from '@xrengine/client-core/src/components/MediaIconsBox/index.tsx'
 import { isBot } from '@xrengine/engine/src/common/functions/isBot.ts'
-
 import { isClient } from '@xrengine/engine/src/common/functions/isClient'
 import { Engine } from '@xrengine/engine/src/ecs/classes/Engine'
 import { World } from '@xrengine/engine/src/ecs/classes/World'
 
+import { startLipsyncTracking, stopLipsyncTracking } from '@xrengine/engine/src/input/functions/WebcamInput'
 import singleton from './speechUtils'
 
 let recording: boolean = false
@@ -16,7 +16,7 @@ window.onbeforeunload = () => {
 }
 
 export default async function ClientSystem(world: World) {
-  if (!isClient || isBot(window) || Engine.isBot) {
+  if (!isClient) {
     return
   }
 
@@ -24,11 +24,17 @@ export default async function ClientSystem(world: World) {
     recording = on
 
     if (on === true) {
-      singleton.getInstance().initRecording(async (text) => {
-        console.log(text)
-      })
+      if (!isBot(window) && !Engine.isBot) {
+        singleton.getInstance().initRecording(async (text) => {
+          console.log(text)
+        })
+      }
+      startLipsyncTracking()
     } else {
-      singleton.getInstance().stopRecording()
+      if (!isBot(window) && !Engine.isBot) {
+        singleton.getInstance().stopRecording()
+      }
+      stopLipsyncTracking()
     }
   })
 
