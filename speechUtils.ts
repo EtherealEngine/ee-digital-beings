@@ -39,6 +39,7 @@ class speechUtils {
 
   constructor() {
     this.socket = io(SPEECH_SERVER_URL)
+    console.log('init speech client:', this.socket.connected)
   }
 
   initRecording = (callback) => {
@@ -61,6 +62,7 @@ class speechUtils {
     }
 
     navigator.mediaDevices.getUserMedia(this.constraints).then(handleSuccess)
+    console.log('init recording')
 
     this.socket.on('connect', (data) => {
       this.socket.emit('join', 'connected')
@@ -75,9 +77,8 @@ class speechUtils {
 
       if (dataFinal === true) {
         let finalString = data.results[0].alternatives[0].transcript
-        console.log("Google Speech sent 'final' Sentence and it is:")
-        console.log(finalString)
-        ChatService.sendMessage(`voice|${finalString}`)
+        console.log('Speech Recognition:', dataFinal)
+        ChatService.sendMessage(`!voice|${finalString}`)
         callback(finalString)
 
         this.finalWord = true
