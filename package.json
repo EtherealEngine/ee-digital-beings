@@ -12,10 +12,10 @@
     },
     "dependencies": {},
     "peerDependencies":{
-      "@xrengine/engine": "^0.4.10",
-      "@xrengine/common": "^0.4.10",
-      "@xrengine/client-core": "^0.4.10",
-      "@xrengine/client": "^0.4.10"
+      "@xrengine/engine": "^0.5.1",
+      "@xrengine/common": "^0.5.1",
+      "@xrengine/client-core": "^0.5.1",
+      "@xrengine/client": "^0.5.1"
     },
     "repository": {
       "type": "git",
