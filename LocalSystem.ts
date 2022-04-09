@@ -21,6 +21,12 @@ console.log('loaded chat system')
 client.service('message').on('created', (params) => {
   const selfUser = accessAuthState().user.value
   const { message } = params
+  let isVoice = false
+  if (message.text?.startsWith('!voice|')) {
+    message.text = message.text.replace('!voice|', '')
+    isVoice = true
+  }
+
   console.log(
     'BOT_MESSAGE|',
     JSON.stringify({
@@ -33,6 +39,10 @@ client.service('message').on('created', (params) => {
     })
   )
 
+  if (isVoice) {
+    return;
+  }
+  
   if (message != undefined && message.text != undefined) {
     if (isPlayerLocal(message.senderId)) {
       if (handleCommand(message.text, Engine.currentWorld.localClientEntity, message.senderId)) return
