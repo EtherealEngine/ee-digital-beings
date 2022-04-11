@@ -22,27 +22,41 @@ client.service('message').on('created', (params) => {
   const selfUser = accessAuthState().user.value
   const { message } = params
   let isVoice = false
+  let isVoiceUrl = false
   if (message.text?.startsWith('!voice|')) {
     message.text = message.text.replace('!voice|', '')
     isVoice = true
+  } else if (message.text?.startsWith('!voiceUrl|')) {
+    message.text = message.text.replace('!voiceUrl|', '')
+    isVoiceUrl = true
   }
 
-  console.log(
-    'BOT_MESSAGE|',
-    JSON.stringify({
-      id: message.id,
-      sender: message.sender.name,
-      senderId: message.sender.userId,
-      channelId: message.channelId,
-      text: message.text,
-      updatedAt: message.updatedAt
-    })
-  )
+  if (!isVoiceUrl) {
+    console.log(
+      'BOT_MESSAGE|',
+      JSON.stringify({
+        id: message.id,
+        sender: message.sender.name,
+        senderId: message.sender.userId,
+        channelId: message.channelId,
+        text: message.text,
+        updatedAt: message.updatedAt
+      })
+    )
+  }
+
+  if (isVoiceUrl) {
+    console.log('got voice url:', message.text)
+    //play audio
+    const audio = new Audio(message.text)
+    audio.play()
+    return
+  }
 
   if (isVoice) {
-    return;
+    return
   }
-  
+
   if (message != undefined && message.text != undefined) {
     if (isPlayerLocal(message.senderId)) {
       if (handleCommand(message.text, Engine.currentWorld.localClientEntity, message.senderId)) return
