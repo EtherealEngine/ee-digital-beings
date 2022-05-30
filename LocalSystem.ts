@@ -59,20 +59,20 @@ client.service('message').on('created', (params) => {
 
   if (message != undefined && message.text != undefined) {
     if (isPlayerLocal(message.senderId)) {
-      if (handleCommand(message.text, Engine.currentWorld.localClientEntity, message.senderId)) return
+      if (handleCommand(message.text,  Engine.instance.currentWorld.localClientEntity, message.senderId)) return
       else {
         const system = getChatMessageSystem(message.text)
         if (system !== 'none') {
           message.text = removeMessageSystem(message.text)
-          if (!isBot(window) && !Engine.isBot && !hasSubscribedToChatSystem(selfUser.id, system)) return
+          if (!isBot(window) && !Engine.instance.isBot && !hasSubscribedToChatSystem(selfUser.id, system)) return
         }
       }
     } else {
       const system = getChatMessageSystem(message.text)
       if (system !== 'none') {
         message.text = removeMessageSystem(message.text)
-        if (!isBot(window) && !Engine.isBot && !Engine.isBot && !hasSubscribedToChatSystem(selfUser.id, system)) return
-      } else if (isCommand(message.text) && !Engine.isBot && !isBot(window)) return
+        if (!isBot(window) && !Engine.instance.isBot && !Engine.instance.isBot && !hasSubscribedToChatSystem(selfUser.id, system)) return
+      } else if (isCommand(message.text) && !Engine.instance.isBot && !isBot(window)) return
     }
   }
 })
