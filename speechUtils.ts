@@ -38,11 +38,15 @@ class speechUtils {
   socket
 
   constructor() {
-    this.socket = io(SPEECH_SERVER_URL)
+    this.socket = io(SPEECH_SERVER_URL, { rejectUnauthorized: false, secure: true })
     console.log('init speech client:', this.socket.connected)
   }
 
   initRecording = (callback) => {
+    if (this.socket === undefined || !this.socket) {
+      this.socket = io(SPEECH_SERVER_URL, { rejectUnauthorized: false, secure: true })
+    }
+
     this.socket.emit('startGoogleCloudStream', '')
     this.streamStreaming = true
     this.AudioContext = window.AudioContext
@@ -112,6 +116,8 @@ class speechUtils {
       this.context = null
       this.AudioContext = null
     })
+    this.socket.disconnect()
+    this.socket = undefined
   }
 
   downsampleBuffer = (buffer, sampleRate, outSampleRate) => {
